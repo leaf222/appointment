@@ -3,6 +3,7 @@ package com.example.ActivityAccess;
 import net.sf.json.JSONObject;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +24,23 @@ public class CreateActivity
 
     private Connection connection = null;
     private Statement statement = null;
+
+    public static void main(String[] args)
+    {
+        CreateActivity createActivity = new CreateActivity();
+
+        Timestamp starttime= new Timestamp(System.currentTimeMillis());//获取系统当前时间
+        SimpleDateFormat df = new SimpleDateFormat("2019-12-1 12:30:30");
+        String timeStr = df.format(starttime);
+        starttime = Timestamp.valueOf(timeStr);
+        Timestamp endtime= new Timestamp(System.currentTimeMillis());//获取系统当前时间
+        df = new SimpleDateFormat("2019-12-1 12:30:30");
+        timeStr = df.format(endtime);
+        endtime = Timestamp.valueOf(timeStr);
+
+        JSONObject result = createActivity.AddToActivity("qwe","跟我冲",starttime,endtime,"嘉定");
+        System.out.println(result);
+    }
 
     public CreateActivity()
     {
@@ -46,8 +64,11 @@ public class CreateActivity
             String sql = "SELECT userid, account, password, identity, status, name, gender, phonenumber, job " +
                     "FROM user WHERE account = '" + account + "'";
             ResultSet rs = statement.executeQuery(sql);
-            int id = rs.getInt("userid");
-            return id;
+            while (rs.next())
+            {
+                int id = rs.getInt("userid");
+                return id;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -55,7 +76,7 @@ public class CreateActivity
     }
 
     //将活动信息添加至Activity表中
-    public JSONObject AddToActivity(String account, String activityname, Date starttime, Date endtime, String address)
+    public JSONObject AddToActivity(String account, String activityname, Timestamp starttime, Timestamp endtime, String address)
     {
         Map map = new HashMap();
         int userid = GetUserId(account);
@@ -64,6 +85,9 @@ public class CreateActivity
         try
         {
             statement.executeUpdate(insert);
+            map.put("创建结果","创建成功");
+            JSONObject jsonObject = JSONObject.fromObject(map);
+            return jsonObject;
         } catch (SQLException e) {
             e.printStackTrace();
         }
