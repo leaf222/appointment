@@ -9,7 +9,7 @@ import java.util.Map;
 
 /**
  * @program: appointment
- * @description: Create, delete and something but no identity.
+ * @description: Create, delete and something.
  * @author: Yifan Ye
  * @create: 2020/01/03
  **/
@@ -95,4 +95,6 @@ public class CreateActivity
         JSONObject jsonObject = JSONObject.fromObject(map);
         return jsonObject;
     }
+
+
 }
