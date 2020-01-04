@@ -1,6 +1,7 @@
 package com.example.ActivityAccess;
 
 import com.mysql.cj.protocol.Resultset;
+import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 
 import java.sql.*;
@@ -27,7 +28,7 @@ public class BrowseActivity
     public static void main(String[] args)
     {
         BrowseActivity browseActivity = new BrowseActivity();
-        JSONObject result = browseActivity.GetInfoByTag("娱乐");
+        JSONObject result = browseActivity.GetComment(1);
         System.out.println(result);
     }
 
@@ -95,11 +96,14 @@ public class BrowseActivity
             ResultSet resultSet = statement.executeQuery(select);
             while (resultSet.next())
             {
+                int userid = resultSet.getInt("userid");
                 String activityname = resultSet.getString("activityname");
                 Timestamp starttime = resultSet.getTimestamp("starttime");
                 Timestamp endtime = resultSet.getTimestamp("endtime");
                 String address = resultSet.getString("address");
 
+                map.put("userid",String.valueOf(userid));
+                map.put("activityid",String.valueOf(activityid));
                 map.put("activityname",activityname);
                 map.put("starttime",String.valueOf(starttime));
                 map.put("endtime",String.valueOf(endtime));
@@ -110,6 +114,39 @@ public class BrowseActivity
             e.printStackTrace();
         }
         return  map;
+    }
+
+    //通过id获取活动信息
+    public JSONObject GetInfo(int activityid)
+    {
+        Map map = new HashMap();
+        try
+        {
+            String select = "SELECT * FROM `se`.`activity` WHERE `activityid` =" + activityid + ";";
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(select);
+            while (resultSet.next())
+            {
+                int userid = resultSet.getInt("userid");
+                String activityname = resultSet.getString("activityname");
+                Timestamp starttime = resultSet.getTimestamp("starttime");
+                Timestamp endtime = resultSet.getTimestamp("endtime");
+                String address = resultSet.getString("address");
+
+                map.put("userid",String.valueOf(userid));
+                map.put("activityid",String.valueOf(activityid));
+                map.put("activityname",activityname);
+                map.put("starttime",String.valueOf(starttime));
+                map.put("endtime",String.valueOf(endtime));
+                map.put("address",address);
+            }
+            JSONObject jsonObject = JSONObject.fromObject(map);
+            return  jsonObject;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        JSONObject jsonObject = JSONObject.fromObject(map);
+        return jsonObject;
     }
 
     //通过tag名称获取所有拥有此tag的活动信息
@@ -183,5 +220,147 @@ public class BrowseActivity
         }
         JSONObject jsonObject = JSONObject.fromObject(map);
         return  jsonObject;
+    }
+
+    //搜索活动
+    public JSONObject SearchActivity(String s)
+    {
+        Map map = new HashMap();
+        try
+        {
+            String select = "SELECT * FROM `se`.`activity` WHERE `activityname` LIKE '%" + s + "%';";
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(select);
+            int i = 0;
+            while (resultSet.next())
+            {
+                i++;
+                Map amap = new HashMap();
+                int activityid = resultSet.getInt("activityid");
+                int userid = resultSet.getInt("userid");
+                String activityname = resultSet.getString("activityname");
+                Timestamp starttime = resultSet.getTimestamp("starttime");
+                Timestamp endtime = resultSet.getTimestamp("endtime");
+                String address = resultSet.getString("address");
+
+                amap.put("activityid",String.valueOf(activityid));
+                amap.put("userid",String.valueOf(userid));
+                amap.put("activityname",activityname);
+                amap.put("starttime",String.valueOf(starttime));
+                amap.put("endtime",String.valueOf(endtime));
+                amap.put("address",address);
+
+                map.put("activity"+String.valueOf(i),amap);
+            }
+            JSONObject jsonObject = JSONObject.fromObject(map);
+            return jsonObject;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        JSONObject jsonObject = JSONObject.fromObject(map);
+        return jsonObject;
+    }
+
+    //返回活动对应的tag
+    public JSONObject GetTag(int activityid)
+    {
+        Map map = new HashMap();
+        try
+        {
+            String select = "SELECT * FROM `se`.`has_tag` WHERE `activityid` =" + activityid + ";";
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(select);
+            int i = 0;
+            while (resultSet.next())
+            {
+                i++;
+                int tagid = resultSet.getInt("tagid");
+                String select1 = "SELECT * FROM `se`.`tag` WHERE tagid = " + tagid + ";";
+                Statement statement1 = connection.createStatement();
+                ResultSet resultSet1 = statement1.executeQuery(select1);
+                while (resultSet1.next())
+                {
+                    String tagname = resultSet1.getString("tagname");
+                    map.put("tag"+String.valueOf(i),tagname);
+                }
+            }
+            JSONObject jsonObject = JSONObject.fromObject(map);
+            return jsonObject;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        JSONObject jsonObject = JSONObject.fromObject(map);
+        return  jsonObject;
+    }
+
+    //返回活动对应的描述
+    public JSONObject GetDescription(int activityid)
+    {
+        Map map = new HashMap();
+        try
+        {
+            String select = "SELECT * FROM `se`.`description` WHERE `activityid` =" + activityid + ";";
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(select);
+            int i = 0;
+            while (resultSet.next())
+            {
+                i++;
+                Map amap = new HashMap();
+                String d_content = resultSet.getString("d_content");
+                Timestamp time = resultSet.getTimestamp("time");
+                amap.put("d_content",d_content);
+                amap.put("time",String.valueOf(time));
+                map.put("description"+String.valueOf(i),amap);
+            }
+            JSONObject jsonObject = JSONObject.fromObject(map);
+            return jsonObject;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        JSONObject jsonObject = JSONObject.fromObject(map);
+        return jsonObject;
+    }
+
+    //返回活动对应的评论
+    public JSONObject GetComment(int activityid)
+    {
+        Map map = new HashMap();
+        try
+        {
+            String select = "SELECT * FROM `se`.`comment` WHERE `activityid` = " + activityid + ";";
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(select);
+            int i = 0;
+            while (resultSet.next())
+            {
+                i++;
+                Map amap = new HashMap();
+                int userid = resultSet.getInt("userid");
+                String account = null;
+                String select2 = "SELECT * FROM `se`.`user` WHERE `userid` = " + userid + ";";
+                Statement statement2 = connection.createStatement();
+                ResultSet resultSet2 = statement2.executeQuery(select2);
+                while (resultSet2.next())
+                {
+                    account = resultSet2.getString("account");
+                }
+
+                String c_content = resultSet.getString("c_content");
+                Timestamp c_time =  resultSet.getTimestamp("c_time");
+                Float score = resultSet.getFloat("score");
+                amap.put("account",account);
+                amap.put("c_content",c_content);
+                amap.put("c_time",String.valueOf(c_time));
+                amap.put("score",String.valueOf(score));
+                map.put("comment"+String.valueOf(i),amap);
+            }
+            JSONObject jsonObject = JSONObject.fromObject(map);
+            return jsonObject;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        JSONObject jsonObject = JSONObject.fromObject(map);
+        return jsonObject;
     }
 }

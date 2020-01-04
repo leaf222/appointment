@@ -37,7 +37,7 @@ public class CreateActivity
         timeStr = df.format(endtime);
         endtime = Timestamp.valueOf(timeStr);
 
-        JSONObject result = createActivity.DeleteActivity(1);
+        JSONObject result = createActivity.AddToActivity("user2","好玩的",starttime,endtime,"我家","aaa","很好玩的哦");
         System.out.println(result);
     }
 
@@ -75,16 +75,32 @@ public class CreateActivity
     }
 
     //将活动信息添加至Activity表中“创建结果”：“创建成功”“创建失败”
-    public JSONObject AddToActivity(String account, String activityname, Timestamp starttime, Timestamp endtime, String address)
+    public JSONObject AddToActivity(String account, String activityname, Timestamp starttime, Timestamp endtime, String address, String imgurl, String d_content)
     {
         Map map = new HashMap();
         int userid = GetUserId(account);
-        String insert = "INSERT INTO `se`.`activity`(`userid`,`activityname`,`starttime`,`endtime`,`address`) " +
-                "values(" + userid + ",'" + activityname + "','" + starttime + "','" + endtime + "','" + address + "');";
+        String insert = "INSERT INTO `se`.`activity`(`userid`,`activityname`,`starttime`,`endtime`,`address`,`imgurl`) " +
+                "values(" + userid + ",'" + activityname + "','" + starttime + "','" + endtime + "','" + address + "','" + imgurl + "');";
         try
         {
             Statement statement = connection.createStatement();
             statement.executeUpdate(insert);
+
+            String select = "SELECT * FROM `se`.`activity` WHERE `activityname` = '" + activityname + "';";
+            Statement statement1 = connection.createStatement();
+            ResultSet resultSet = statement1.executeQuery(select);
+            int activityid = 0;
+            while (resultSet.next())
+            {
+                activityid = resultSet.getInt("activityid");
+            }
+
+            Timestamp time = new Timestamp(System.currentTimeMillis());
+            String insert3 = "INSERT INTO `se`.`description`(`activityid`,`time`,`d_content`) "
+                    + "VALUES(" + activityid + ",'" + time + "','" + d_content + "')";
+            Statement statement2 =  connection.createStatement();
+            statement2.executeUpdate(insert3);
+
             map.put("创建结果","创建成功");
             JSONObject jsonObject = JSONObject.fromObject(map);
             return jsonObject;
@@ -115,4 +131,5 @@ public class CreateActivity
         JSONObject jsonObject = JSONObject.fromObject(map);
         return jsonObject;
     }
+
 }

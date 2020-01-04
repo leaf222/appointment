@@ -23,10 +23,20 @@ public class UserController
     @Autowired
     UserSign userSign;
 
+    //用户登录
     @PostMapping("/signin")
     public JSONObject ControllerSignIn(@RequestBody JSONObject jsonObject)
     {
         return  userSign.SignIn(jsonObject.getString("account")
         ,jsonObject.getString("password"));
     }
+
+    //用户注册
+    @PostMapping("/signup")
+    public JSONObject ControllerSignUp(@RequestBody JSONObject jsonObject)
+    {
+        return userSign.SignUp(jsonObject.getString("account")
+        ,jsonObject.getString("password"));
+    }
+
 }
