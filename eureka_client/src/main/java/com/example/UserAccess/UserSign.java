@@ -209,4 +209,24 @@ public class UserSign
         JSONObject jsonObject = JSONObject.fromObject(map);
         return jsonObject;
     }
+
+    //添加头像url至数据库
+    public JSONObject AddPicture(String accout, String url)
+    {
+        Map map = new HashMap();
+        try
+        {
+            String insert = "INSERT INTO `se`.`user`(`picture`) VALUES('" + url + "');";
+            Statement statement = connection.createStatement();
+            statement.executeUpdate(insert);
+            map.put("插入结果","插入成功");
+            JSONObject jsonObject = JSONObject.fromObject(map);
+            return jsonObject;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        map.put("插入结果","插入失败");
+        JSONObject jsonObject = JSONObject.fromObject(map);
+        return jsonObject;
+    }
 }
