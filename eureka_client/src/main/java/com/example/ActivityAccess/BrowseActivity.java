@@ -28,7 +28,7 @@ public class BrowseActivity
     public static void main(String[] args)
     {
         BrowseActivity browseActivity = new BrowseActivity();
-        JSONObject result = browseActivity.GetInfoById(6);
+        JSONObject result = browseActivity.GetAllInfo();
         System.out.println(result);
     }
 
@@ -59,11 +59,13 @@ public class BrowseActivity
             {
                 i++;
                 Map amap = new HashMap();
+                int userid = resultset.getInt("userid");
                 String activityname = resultset.getString("activityname");
                 Timestamp starttime = resultset.getTimestamp("starttime");
                 Timestamp endtime = resultset.getTimestamp("endtime");
                 String address = resultset.getString("address");
 
+                amap.put("userid",String.valueOf(userid));
                 amap.put("activityname",activityname);
                 amap.put("starttime",String.valueOf(starttime));
                 amap.put("endtime",String.valueOf(endtime));
@@ -76,6 +78,7 @@ public class BrowseActivity
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        map.put("??","???");
         JSONObject jsonObject = JSONObject.fromObject(map);
         return jsonObject;
     }

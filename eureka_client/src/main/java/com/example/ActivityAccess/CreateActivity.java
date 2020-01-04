@@ -75,7 +75,7 @@ public class CreateActivity
         return 0;
     }
 
-    //将活动信息添加至Activity表中
+    //将活动信息添加至Activity表中“创建结果”：“创建成功”“创建失败”
     public JSONObject AddToActivity(String account, String activityname, Timestamp starttime, Timestamp endtime, String address)
     {
         Map map = new HashMap();
@@ -97,4 +97,9 @@ public class CreateActivity
     }
 
 
+    //
+    /*public JSONObject DeleteActivity()
+    {
+
+    }*/
 }
