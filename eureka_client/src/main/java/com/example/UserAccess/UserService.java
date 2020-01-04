@@ -25,7 +25,7 @@ public class UserService
 
     public static void main(String[] args) {
         UserService userService = new UserService();
-        String result = userService.GetAccount(2);
+        JSONObject result = userService.GetParticipantInfo("user2");
         System.out.println(result);
     }
 
@@ -77,7 +77,7 @@ public class UserService
     }
 
     //获取审核信息
-    public JSONObject getParticipantInfo(String account)
+    public JSONObject GetParticipantInfo(String account)
     {
         Map map = new HashMap();
         try
@@ -89,11 +89,27 @@ public class UserService
             String select1 = "SELECT * FROM `se`.`activity` WHERE `userid` = " + userid + ";";
             Statement statement = connection.createStatement();
             ResultSet resultSet1 = statement.executeQuery(select1);
+            int i = 0;
             while (resultSet1.next())
             {
-
+                int activityid = resultSet1.getInt("activityid");
+                String activityname = resultSet1.getString("activityname");
+                String select2 = "SELECT * FROM `se`.`participant` WHERE `activityid` = " + activityid + " AND `accept` = 0;";
+                Statement statement1 = connection.createStatement();
+                ResultSet resultSet2 = statement1.executeQuery(select2);
+                while (resultSet2.next())
+                {
+                    i++;
+                    int auserid = resultSet2.getInt("userid");
+                    String aaccount = GetAccount(auserid);
+                    Map amap = new HashMap();
+                    amap.put("activityname",activityname);
+                    amap.put("account",aaccount);
+                    map.put("participant" + String.valueOf(i),amap);
+                }
             }
-
+            JSONObject jsonObject = JSONObject.fromObject(map);
+            return jsonObject;
         } catch (SQLException e) {
             e.printStackTrace();
         }
