@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 
 /**
  * @program: appointment
@@ -73,10 +74,19 @@ public class ActivityController
     @PostMapping("/createactivity")
     public JSONObject ControllerCreateActivity(@RequestBody JSONObject jsonObject)
     {
+        Timestamp starttime= new Timestamp(System.currentTimeMillis());//获取系统当前时间
+        SimpleDateFormat df = new SimpleDateFormat(jsonObject.getString("starttime"));
+        String timeStr = df.format(starttime);
+        starttime = Timestamp.valueOf(timeStr);
+        Timestamp endtime= new Timestamp(System.currentTimeMillis());//获取系统当前时间
+        df = new SimpleDateFormat(jsonObject.getString("endtime"));
+        timeStr = df.format(endtime);
+        endtime = Timestamp.valueOf(timeStr);
+
         return createActivity.AddToActivity(jsonObject.getString("account")
         ,jsonObject.getString("activityname")
-        ,new Timestamp(jsonObject.getLong("starttime"))//这里创建Timestamp的时候，以毫秒数
-        ,new Timestamp(jsonObject.getLong("endtime"))//作为构造的参数
+        ,starttime//这里创建Timestamp的时候，以毫秒数
+        ,endtime//作为构造的参数
         ,jsonObject.getString("address")
         ,jsonObject.getString("imgurl")
         ,jsonObject.getString("description"));

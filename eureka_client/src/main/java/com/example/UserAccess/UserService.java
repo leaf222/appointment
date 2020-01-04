@@ -76,7 +76,7 @@ public class UserService
         return "";
     }
 
-    //获取审核信息
+    //活动发布者获取审核信息
     public JSONObject GetParticipantInfo(String account)
     {
         Map map = new HashMap();
@@ -116,4 +116,10 @@ public class UserService
         JSONObject jsonObject = JSONObject.fromObject(map);
         return jsonObject;
     }
+
+    //审核结果
+    /*public JSONObject Accept(String account, int activityid, int accept)
+    {
+
+    }*/
 }
