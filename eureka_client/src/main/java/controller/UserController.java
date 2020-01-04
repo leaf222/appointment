@@ -3,6 +3,7 @@ package controller;
 import com.example.UserAccess.UserSign;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author: Yifan Ye
  * @create: 2020/01/04
  **/
+@Transactional
 @RestController
 @RequestMapping(value = "/user")
 public class UserController
