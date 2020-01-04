@@ -24,7 +24,6 @@ public class UserSign
     static final String PASS = "root";
 
     private Connection connection = null;
-    private Statement statement = null;
 
     public UserSign()
     {
@@ -32,7 +31,6 @@ public class UserSign
         {
             Class.forName(JDBC_DRIVER);
             connection = DriverManager.getConnection(DB_URL,USER,PASS);
-            statement = connection.createStatement();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {
@@ -55,6 +53,7 @@ public class UserSign
         {
             String sql = "SELECT userid, account, password, identity, status, name, gender, phonenumber, job " +
                     "FROM user WHERE account = '" + account + "'";
+            Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery(sql);
             return rs;
         } catch (SQLException e) {
@@ -109,6 +108,7 @@ public class UserSign
                     String update = "update `se`.`user` " +
                             "set `status` = true " +
                             "where `account` = '" + account + "';";
+                    Statement statement = connection.createStatement();
                     statement.executeUpdate(update);
                     map.put("登录结果","登录成功");
                     JSONObject jsonObject = JSONObject.fromObject(map);
@@ -147,6 +147,7 @@ public class UserSign
             String update = "update `se`.`user` " +
                     "set `status` = false " +
                     "where `account` = '" + account + "';";
+            Statement statement = connection.createStatement();
             statement.executeUpdate(update);
             map.put("注销结果","注销成功");
             JSONObject jsonObject = JSONObject.fromObject(map);
@@ -168,6 +169,7 @@ public class UserSign
             String update = "update `se`.`user` " +
                     "set `name` = '" + name + "',`gender` = " + gender + ",`phonenumber` = '" + phonenumber + "',`job` = '" + job + "' " +
                     "where `account` = '" + account + "';";
+            Statement statement = connection.createStatement();
             statement.executeUpdate(update);
             map.put("更新结果","更新成功");
             JSONObject jsonObject = JSONObject.fromObject(map);
@@ -189,11 +191,13 @@ public class UserSign
             ResultSet resultSet = GetInfo(account);
             while (resultSet.next())
             {
+                int identity = resultSet.getInt("identity");
                 String name  = resultSet.getString("name");
                 boolean gender = resultSet.getBoolean("gender");
                 String phonenumber = resultSet.getString("phonenumber");
                 String job = resultSet.getString("job");
 
+                map.put("status",String.valueOf(identity));
                 map.put("name",name);
                 map.put("gender",String.valueOf(gender));
                 map.put("phonenumber",phonenumber);

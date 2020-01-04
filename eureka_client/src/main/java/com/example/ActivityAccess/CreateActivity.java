@@ -23,7 +23,6 @@ public class CreateActivity
     static final String PASS = "root";
 
     private Connection connection = null;
-    private Statement statement = null;
 
     public static void main(String[] args)
     {
@@ -38,7 +37,7 @@ public class CreateActivity
         timeStr = df.format(endtime);
         endtime = Timestamp.valueOf(timeStr);
 
-        JSONObject result = createActivity.AddToActivity("qwe","跟我冲",starttime,endtime,"嘉定");
+        JSONObject result = createActivity.DeleteActivity(1);
         System.out.println(result);
     }
 
@@ -48,7 +47,6 @@ public class CreateActivity
         {
             Class.forName(JDBC_DRIVER);
             connection = DriverManager.getConnection(DB_URL,USER,PASS);
-            statement = connection.createStatement();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {
@@ -63,6 +61,7 @@ public class CreateActivity
         {
             String sql = "SELECT userid, account, password, identity, status, name, gender, phonenumber, job " +
                     "FROM user WHERE account = '" + account + "'";
+            Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery(sql);
             while (rs.next())
             {
@@ -84,6 +83,7 @@ public class CreateActivity
                 "values(" + userid + ",'" + activityname + "','" + starttime + "','" + endtime + "','" + address + "');";
         try
         {
+            Statement statement = connection.createStatement();
             statement.executeUpdate(insert);
             map.put("创建结果","创建成功");
             JSONObject jsonObject = JSONObject.fromObject(map);
@@ -96,10 +96,23 @@ public class CreateActivity
         return jsonObject;
     }
 
-
-    //
-    /*public JSONObject DeleteActivity()
+    //删除活动“删除结果”：“删除成功”“删除失败”
+    public JSONObject DeleteActivity(int activityid)
     {
-
-    }*/
+        Map map = new HashMap();
+        try
+        {
+            String delete = "DELETE FROM `se`.`activity` WHERE `activityid` = " + activityid + ";";
+            Statement statement = connection.createStatement();
+            statement.executeUpdate(delete);
+            map.put("删除结果","删除成功");
+            JSONObject jsonObject = JSONObject.fromObject(map);
+            return jsonObject;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        map.put("删除结果","删除失败");
+        JSONObject jsonObject = JSONObject.fromObject(map);
+        return jsonObject;
+    }
 }
