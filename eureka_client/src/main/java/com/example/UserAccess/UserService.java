@@ -1,10 +1,13 @@
 package com.example.UserAccess;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,7 +35,7 @@ public class UserService
         c_time = Timestamp.valueOf(timeStr);
 
         UserService userService = new UserService();
-        JSONObject result = userService.Comment("xxx",c_time,"user3",1, (float) 9.9);
+        JSONArray result = userService.ViewAccept("user1");
         System.out.println(result);
     }
 
@@ -177,5 +180,308 @@ public class UserService
         map.put("评价结果","已经评论过");
         JSONObject jsonObject = JSONObject.fromObject(map);
         return jsonObject;
+    }
+
+    //申请参加活动“申请结果”：“申请成功，，等待审核”“已经申请过了”
+    public JSONObject JoinActivity(String account, int activityid)
+    {
+        Map map = new HashMap();
+        try
+        {
+            ResultSet resultSet = GetInfo(account);
+            int userid = 0;
+            while(resultSet.next())
+            {
+                userid = resultSet.getInt("userid");
+            }
+            String insert = "INSERT INTO `se`.`participant`(`activityid`,`userid`,`accept`) "
+                    + "VALUES(" + activityid+"," + userid + ",0);";
+            Statement statement = connection.createStatement();
+            statement.executeUpdate(insert);
+            map.put("申请结果","申请成功，等待审核");
+            JSONObject jsonObject = JSONObject.fromObject(map);
+            return jsonObject;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        map.put("申请结果","已经申请过了");
+        JSONObject jsonObject = JSONObject.fromObject(map);
+        return jsonObject;
+    }
+
+    //退出活动“退出结果”：“成功退出”“不在活动中”
+    public JSONObject ExitActivity(String account, int activityid)
+    {
+        Map map = new HashMap();
+        try
+        {
+            ResultSet resultSet = GetInfo(account);
+            int userid = 0;
+            while(resultSet.next())
+            {
+                userid = resultSet.getInt("userid");
+            }
+            String delete = "DELETE FROM `se`.`participant` WHERE `activityid` = "
+                    + activityid + " AND `userid` = " + userid + ";";
+            Statement statement = connection.createStatement();
+            statement.executeUpdate(delete);
+            map.put("退出结果","成功退出");
+            JSONObject jsonObject = JSONObject.fromObject(map);
+            return jsonObject;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        map.put("退出结果","不在活动中");
+        JSONObject jsonObject = JSONObject.fromObject(map);
+        return jsonObject;
+    }
+
+    //收藏活动“收藏结果”：“收藏成功”“已经收藏”
+    public JSONObject FavoriteActivity(String account, int activityid)
+    {
+        Map map = new HashMap();
+        try
+        {
+            ResultSet resultSet = GetInfo(account);
+            int userid = 0;
+            while(resultSet.next())
+            {
+                userid = resultSet.getInt("userid");
+            }
+            String insert = "INSERT INTO `se`.`favorite`(`activityid`,`userid`) "
+                    + "VALUES(" + activityid + "," + userid + ");";
+            Statement statement = connection.createStatement();
+            statement.executeUpdate(insert);
+            map.put("收藏结果","收藏成功");
+            JSONObject jsonObject = JSONObject.fromObject(map);
+            return jsonObject;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        map.put("收藏结果","已经收藏");
+        JSONObject jsonObject = JSONObject.fromObject(map);
+        return jsonObject;
+    }
+
+    //取消收藏“取消收藏结果”：“成功取消收藏”“未收藏”
+    public JSONObject CancelFavorite(String account, int activityid)
+    {
+        Map map = new HashMap();
+        try
+        {
+            ResultSet resultSet = GetInfo(account);
+            int userid = 0;
+            while(resultSet.next())
+            {
+                userid = resultSet.getInt("userid");
+            }
+            String delete = "DELETE FROM `se`.`favorite` WHERE `userid` = " + userid + " AND `activityid` = " + activityid + ";";
+            Statement statement = connection.createStatement();
+            statement.executeUpdate(delete);
+            map.put("取消收藏结果","成功取消收藏");
+            JSONObject jsonObject = JSONObject.fromObject(map);
+            return jsonObject;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        map.put("取消收藏结果","未收藏");
+        JSONObject jsonObject = JSONObject.fromObject(map);
+        return jsonObject;
+    }
+
+    //查看收藏
+    public JSONArray ViewFavorite(String account)
+    {
+        List list = new LinkedList();
+        try
+        {
+            ResultSet resultSet = GetInfo(account);
+            int userid = 0;
+            while(resultSet.next())
+            {
+                userid = resultSet.getInt("userid");
+            }
+            String select = "SELECT * FROM `se`.`favorite` WHERE `userid` = " + userid + ";";
+            Statement statement = connection.createStatement();
+            ResultSet resultSet1 = statement.executeQuery(select);
+            while (resultSet1.next())
+            {
+                Map map = new HashMap();
+                int activityid = resultSet1.getInt("activityid");
+                String select2 = "SELECT * FROM `se`.`activity` WHERE `activityid` = " + activityid + ";";
+                Statement statement1 = connection.createStatement();
+                ResultSet resultSet2 = statement1.executeQuery(select2);
+                while (resultSet2.next())
+                {
+                    int userid1 = resultSet2.getInt("userid");
+                    String account1 = GetAccount(userid1);
+                    String activityname = resultSet2.getString("activityname");
+                    Timestamp starttime = resultSet2.getTimestamp("starttime");
+                    Timestamp endtime = resultSet2.getTimestamp("endtime");
+                    String address = resultSet2.getString("address");
+
+                    map.put("userid",String.valueOf(userid1));
+                    map.put("account",account1);
+                    map.put("activityid",String.valueOf(activityid));
+                    map.put("activityname",activityname);
+                    map.put("starttime",String.valueOf(starttime));
+                    map.put("endtime",String.valueOf(endtime));
+                    map.put("address",address);
+                }
+                list.add(map);
+            }
+            JSONArray jsonArray = JSONArray.fromObject(list);
+            return jsonArray;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        JSONArray jsonArray = JSONArray.fromObject(list);
+        return jsonArray;
+    }
+
+    //查看发布
+    public JSONArray ViewPublish(String account)
+    {
+        List list = new LinkedList();
+        try
+        {
+            ResultSet resultSet = GetInfo(account);
+            int userid = 0;
+            while(resultSet.next())
+            {
+                userid = resultSet.getInt("userid");
+            }
+            String select = "SELECT * FROM `se`.`activity` WHERE `userid` = " + userid + ";";
+            Statement statement = connection.createStatement();
+            ResultSet resultSet1 = statement.executeQuery(select);
+            while (resultSet1.next())
+            {
+                Map map = new HashMap();
+
+                int userid1 = resultSet1.getInt("userid");
+                int activityid = resultSet1.getInt("activityid");
+                String account1 = GetAccount(userid1);
+                String activityname = resultSet1.getString("activityname");
+                Timestamp starttime = resultSet1.getTimestamp("starttime");
+                Timestamp endtime = resultSet1.getTimestamp("endtime");
+                String address = resultSet1.getString("address");
+
+                map.put("userid",String.valueOf(userid1));
+                map.put("account",account1);
+                map.put("activityid",String.valueOf(activityid));
+                map.put("activityname",activityname);
+                map.put("starttime",String.valueOf(starttime));
+                map.put("endtime",String.valueOf(endtime));
+                map.put("address",address);
+
+                list.add(map);
+            }
+            JSONArray jsonArray = JSONArray.fromObject(list);
+            return jsonArray;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        JSONArray jsonArray = JSONArray.fromObject(list);
+        return jsonArray;
+    }
+
+    //查看参与的
+    public JSONArray ViewParticipant(String account)
+    {
+        List list = new LinkedList();
+        try
+        {
+            ResultSet resultSet = GetInfo(account);
+            int userid = 0;
+            while(resultSet.next())
+            {
+                userid = resultSet.getInt("userid");
+            }
+            String select = "SELECT * FROM `se`.`participant` WHERE `userid` = " + userid + " AND `accept` = 2;";
+            Statement statement = connection.createStatement();
+            ResultSet resultSet1 = statement.executeQuery(select);
+            while (resultSet1.next())
+            {
+                Map map = new HashMap();
+                int activityid = resultSet1.getInt("activityid");
+                String select2 = "SELECT * FROM `se`.`activity` WHERE `activityid` = " + activityid + ";";
+                Statement statement1 = connection.createStatement();
+                ResultSet resultSet2 = statement1.executeQuery(select2);
+                while (resultSet2.next())
+                {
+                    int userid1 = resultSet2.getInt("userid");
+                    String account1 = GetAccount(userid1);
+                    String activityname = resultSet2.getString("activityname");
+                    Timestamp starttime = resultSet2.getTimestamp("starttime");
+                    Timestamp endtime = resultSet2.getTimestamp("endtime");
+                    String address = resultSet2.getString("address");
+
+                    map.put("userid",String.valueOf(userid1));
+                    map.put("account",account1);
+                    map.put("activityid",String.valueOf(activityid));
+                    map.put("activityname",activityname);
+                    map.put("starttime",String.valueOf(starttime));
+                    map.put("endtime",String.valueOf(endtime));
+                    map.put("address",address);
+                }
+                list.add(map);
+            }
+            JSONArray jsonArray = JSONArray.fromObject(list);
+            return jsonArray;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        JSONArray jsonArray = JSONArray.fromObject(list);
+        return jsonArray;
+    }
+
+    //查看申请的
+    public JSONArray ViewAccept(String account)
+    {
+        List list = new LinkedList();
+        try
+        {
+            ResultSet resultSet = GetInfo(account);
+            int userid = 0;
+            while(resultSet.next())
+            {
+                userid = resultSet.getInt("userid");
+            }
+            String select = "SELECT * FROM `se`.`participant` WHERE `userid` = " + userid + " AND `accept` = 0;";
+            Statement statement = connection.createStatement();
+            ResultSet resultSet1 = statement.executeQuery(select);
+            while (resultSet1.next())
+            {
+                Map map = new HashMap();
+                int activityid = resultSet1.getInt("activityid");
+                String select2 = "SELECT * FROM `se`.`activity` WHERE `activityid` = " + activityid + ";";
+                Statement statement1 = connection.createStatement();
+                ResultSet resultSet2 = statement1.executeQuery(select2);
+                while (resultSet2.next())
+                {
+                    int userid1 = resultSet2.getInt("userid");
+                    String account1 = GetAccount(userid1);
+                    String activityname = resultSet2.getString("activityname");
+                    Timestamp starttime = resultSet2.getTimestamp("starttime");
+                    Timestamp endtime = resultSet2.getTimestamp("endtime");
+                    String address = resultSet2.getString("address");
+
+                    map.put("userid",String.valueOf(userid1));
+                    map.put("account",account1);
+                    map.put("activityid",String.valueOf(activityid));
+                    map.put("activityname",activityname);
+                    map.put("starttime",String.valueOf(starttime));
+                    map.put("endtime",String.valueOf(endtime));
+                    map.put("address",address);
+                }
+                list.add(map);
+            }
+            JSONArray jsonArray = JSONArray.fromObject(list);
+            return jsonArray;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        JSONArray jsonArray = JSONArray.fromObject(list);
+        return jsonArray;
     }
 }

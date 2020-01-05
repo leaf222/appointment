@@ -2,6 +2,7 @@ package controller;
 
 import com.example.UserAccess.UserService;
 import com.example.UserAccess.UserSign;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.embedded.undertow.UndertowServletWebServer;
@@ -54,6 +55,24 @@ public class UserController
         ,jsonObject.getInt("accept"));
     }
 
+    //退出登录
+    @PostMapping("/signout")
+    public JSONObject ControllerSignOut(@RequestBody JSONObject jsonObject)
+    {
+        return userSign.SignOut(jsonObject.getString("account"));
+    }
+
+    //修改个人信息
+    @PostMapping("/modifyinfo")
+    public JSONObject ControllerModifyInfo(@RequestBody JSONObject jsonObject)
+    {
+        return userSign.UpdateInfo(jsonObject.getString("account")
+        ,jsonObject.getString("name")
+        ,jsonObject.getBoolean("gender")
+        ,jsonObject.getString("phonenumber")
+        ,jsonObject.getString("job"));
+    }
+
     //显示审核信息
     @PostMapping("/viewaccept")
     public JSONObject ControllerViewAccept(@RequestBody JSONObject jsonObject)
@@ -74,5 +93,65 @@ public class UserController
         ,jsonObject.getString("account")
         ,jsonObject.getInt("activityid")
         , (float) jsonObject.getDouble("score"));
+    }
+
+    //申请参加活动
+    @PostMapping("/joinactivity")
+    public JSONObject ControllerJoinActivity(@RequestBody JSONObject jsonObject)
+    {
+        return userService.JoinActivity(jsonObject.getString("account")
+        ,jsonObject.getInt("activityid"));
+    }
+
+    //退出活动
+    @PostMapping("/exitactivity")
+    public JSONObject ControllerExitActivity(@RequestBody JSONObject jsonObject)
+    {
+        return userService.ExitActivity(jsonObject.getString("account")
+        ,jsonObject.getInt("activityid"));
+    }
+
+    //收藏活动
+    @PostMapping("/favoriteactivity")
+    public JSONObject ControllerFavoriteActivity(@RequestBody JSONObject jsonObject)
+    {
+        return userService.FavoriteActivity(jsonObject.getString("account")
+        ,jsonObject.getInt("activityid"));
+    }
+
+    //取消收藏
+    @PostMapping("/cancelfavorite")
+    public JSONObject ControllerCancelFavorite(@RequestBody JSONObject jsonObject)
+    {
+        return userService.CancelFavorite(jsonObject.getString("account")
+        ,jsonObject.getInt("activityid"));
+    }
+
+    //查看收藏
+    @PostMapping("/viewfavorite")
+    public JSONArray ControllerViewFavorite(@RequestBody JSONObject jsonObject)
+    {
+        return userService.ViewFavorite(jsonObject.getString("account"));
+    }
+
+    //查看发布
+    @PostMapping("/viewpublish")
+    public JSONArray ControllerViewPublish(@RequestBody JSONObject jsonObject)
+    {
+        return userService.ViewPublish(jsonObject.getString("account"));
+    }
+
+    //查看参与
+    @PostMapping("/viewparticipant")
+    public JSONArray ControllerViewParticipant(@RequestBody JSONObject jsonObject)
+    {
+        return userService.ViewParticipant(jsonObject.getString("account"));
+    }
+
+    //查看申请
+    @PostMapping("/viewmypermission")
+    public JSONArray ControllerViewMyPermission(@RequestBody JSONObject jsonObject)
+    {
+        return userService.ViewAccept(jsonObject.getString("account"));
     }
 }
