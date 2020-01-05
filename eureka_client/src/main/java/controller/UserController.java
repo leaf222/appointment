@@ -73,6 +73,14 @@ public class UserController
         ,jsonObject.getString("job"));
     }
 
+    //修改头像
+    @PostMapping("/addpicture")
+    public JSONObject ControllerAddPicture(@RequestBody JSONObject jsonObject)
+    {
+        return userSign.AddPicture(jsonObject.getString("account")
+        ,jsonObject.getString("url"));
+    }
+
     //显示审核信息
     @PostMapping("/viewaccept")
     public JSONObject ControllerViewAccept(@RequestBody JSONObject jsonObject)
@@ -153,5 +161,36 @@ public class UserController
     public JSONArray ControllerViewMyPermission(@RequestBody JSONObject jsonObject)
     {
         return userService.ViewAccept(jsonObject.getString("account"));
+    }
+
+    //普通用户申请等级
+    @PostMapping("/getlevel")
+    public JSONObject ControllerGetLevel(@RequestBody JSONObject jsonObject)
+    {
+        return userService.GetLevel(jsonObject.getString("account")
+        ,jsonObject.getInt("level"));
+    }
+
+    //管理员通过审核
+    @PostMapping("/acceptpermission")
+    public JSONObject ControllerAcceptPermission(@RequestBody JSONObject jsonObject)
+    {
+        return userService.LevelPermission(jsonObject.getString("account")
+        ,jsonObject.getInt("level"));
+    }
+
+    //管理员拒绝审核
+    @PostMapping("/refusepermission")
+    public JSONObject ControllerRefusePermission(@RequestBody JSONObject jsonObject)
+    {
+        return userService.RefusePermission(jsonObject.getString("account")
+        ,jsonObject.getInt("level"));
+    }
+
+    //展示审核列表
+    @PostMapping("/viewallpermission")
+    public JSONArray ControllerViewAllPermission(@RequestBody JSONObject jsonObject)
+    {
+        return userService.ViewAllPermission();
     }
 }

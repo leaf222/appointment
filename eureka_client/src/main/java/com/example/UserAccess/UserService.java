@@ -35,7 +35,7 @@ public class UserService
         c_time = Timestamp.valueOf(timeStr);
 
         UserService userService = new UserService();
-        JSONArray result = userService.ViewAccept("user1");
+        JSONObject result = userService.LevelPermission("user2",2);
         System.out.println(result);
     }
 
@@ -385,7 +385,7 @@ public class UserService
         return jsonArray;
     }
 
-    //查看参与的
+    //查看自己参与的
     public JSONArray ViewParticipant(String account)
     {
         List list = new LinkedList();
@@ -435,7 +435,7 @@ public class UserService
         return jsonArray;
     }
 
-    //查看申请的
+    //查看自己申请的
     public JSONArray ViewAccept(String account)
     {
         List list = new LinkedList();
@@ -474,6 +474,116 @@ public class UserService
                     map.put("endtime",String.valueOf(endtime));
                     map.put("address",address);
                 }
+                list.add(map);
+            }
+            JSONArray jsonArray = JSONArray.fromObject(list);
+            return jsonArray;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        JSONArray jsonArray = JSONArray.fromObject(list);
+        return jsonArray;
+    }
+
+    //普通用户申请身份“申请结果”：“等待审核”“申请失败”
+    public JSONObject GetLevel(String account, int level)
+    {
+        Map map = new HashMap();
+        try
+        {
+            ResultSet resultSet = GetInfo(account);
+            int userid = 0;
+            while(resultSet.next())
+            {
+                userid = resultSet.getInt("userid");
+            }
+            String insert = "INSERT INTO `se`.`permission`(`userid`,`level`) "
+                    + "VALUES("+userid+","+level+");";
+            Statement statement = connection.createStatement();
+            statement.executeUpdate(insert);
+            map.put("申请结果","等待审核");
+            JSONObject jsonObject = JSONObject.fromObject(map);
+            return jsonObject;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        map.put("申请结果","已经申请");
+        JSONObject jsonObject = JSONObject.fromObject(map);
+        return jsonObject;
+    }
+
+    //管理员审核申请“审核结果”：“审核完成”“审核出现意外错误”
+    public JSONObject LevelPermission(String account, int level)
+    {
+        Map map = new HashMap();
+        try
+        {
+            ResultSet resultSet = GetInfo(account);
+            int userid = 0;
+            while(resultSet.next())
+            {
+                userid = resultSet.getInt("userid");
+            }
+            String delete = "DELETE FROM `se`.`permission` WHERE `userid` = " + userid + ";";
+            Statement statement = connection.createStatement();
+            statement.executeUpdate(delete);
+            String update = "UPDATE `se`.`user` SET `identity` = " + level + " WHERE `userid` = " + userid + ";";
+            Statement statement1 = connection.createStatement();
+            statement.executeUpdate(update);
+            map.put("审核结果","审核完成");
+            JSONObject jsonObject = JSONObject.fromObject(map);
+            return jsonObject;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        map.put("审核结果","审核出现意外错误");
+        JSONObject jsonObject = JSONObject.fromObject(map);
+        return jsonObject;
+    }
+
+    //管理员拒绝通过审核“审核结果”：“审核完成”“审核出现意外错误”
+    public JSONObject RefusePermission(String account, int level)
+    {
+        Map map = new HashMap();
+        try
+        {
+            ResultSet resultSet = GetInfo(account);
+            int userid = 0;
+            while(resultSet.next())
+            {
+                userid = resultSet.getInt("userid");
+            }
+            String delete = "DELETE FROM `se`.`permission` WHERE `userid` = " + userid + ";";
+            Statement statement = connection.createStatement();
+            statement.executeUpdate(delete);
+            map.put("审核结果","审核完成");
+            JSONObject jsonObject = JSONObject.fromObject(map);
+            return jsonObject;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        map.put("审核结果","审核出现意外错误");
+        JSONObject jsonObject = JSONObject.fromObject(map);
+        return jsonObject;
+    }
+
+    //展示审核列表
+    public JSONArray ViewAllPermission()
+    {
+        List list = new LinkedList();
+        try
+        {
+            String select = "SELECT * FROM `se`.`permission`;";
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(select);
+            while (resultSet.next())
+            {
+                int userid = resultSet.getInt("userid");
+                int level = resultSet.getInt("level");
+                String account = GetAccount(userid);
+                Map map = new HashMap();
+                map.put("account",account);
+                map.put("level",String.valueOf(level));
                 list.add(map);
             }
             JSONArray jsonArray = JSONArray.fromObject(list);
