@@ -87,9 +87,9 @@ public class UserService
     }
 
     //活动发布者获取审核信息
-    public JSONObject GetParticipantInfo(String account)
+    public JSONArray GetParticipantInfo(String account)
     {
-        Map map = new HashMap();
+        List list = new LinkedList();
         try
         {
             ResultSet resultSet = GetInfo(account);
@@ -99,7 +99,6 @@ public class UserService
             String select1 = "SELECT * FROM `se`.`activity` WHERE `userid` = " + userid + ";";
             Statement statement = connection.createStatement();
             ResultSet resultSet1 = statement.executeQuery(select1);
-            int i = 0;
             while (resultSet1.next())
             {
                 int activityid = resultSet1.getInt("activityid");
@@ -109,22 +108,21 @@ public class UserService
                 ResultSet resultSet2 = statement1.executeQuery(select2);
                 while (resultSet2.next())
                 {
-                    i++;
                     int auserid = resultSet2.getInt("userid");
                     String aaccount = GetAccount(auserid);
                     Map amap = new HashMap();
                     amap.put("activityname",activityname);
                     amap.put("account",aaccount);
-                    map.put("participant" + String.valueOf(i),amap);
+                    list.add(amap);
                 }
             }
-            JSONObject jsonObject = JSONObject.fromObject(map);
-            return jsonObject;
+            JSONArray jsonArray = JSONArray.fromObject(list);
+            return jsonArray;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        JSONObject jsonObject = JSONObject.fromObject(map);
-        return jsonObject;
+        JSONArray jsonArray = JSONArray.fromObject(list);
+        return jsonArray;
     }
 
     //审核结果“审核结果”:“审核完成”“审核异常”

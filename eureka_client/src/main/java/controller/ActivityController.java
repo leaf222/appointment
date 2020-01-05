@@ -2,6 +2,7 @@ package controller;
 
 import com.example.ActivityAccess.BrowseActivity;
 import com.example.ActivityAccess.CreateActivity;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,14 +31,14 @@ public class ActivityController
 
     //查看所有活动
     @PostMapping("/allactivity")
-    public JSONObject ControllerAllActivityInfo(@RequestBody JSONObject jsonObject)
+    public JSONArray ControllerAllActivityInfo(@RequestBody JSONObject jsonObject)
     {
         return browseActivity.GetAllInfo();
     }
 
     //搜索活动
     @PostMapping("/searchactivity")
-    public JSONObject ControllerSearchActivity(@RequestBody JSONObject jsonObject)
+    public JSONArray ControllerSearchActivity(@RequestBody JSONObject jsonObject)
     {
         return browseActivity.SearchActivity(jsonObject.getString("activityname"));
     }
@@ -51,21 +52,21 @@ public class ActivityController
 
     //返回活动的tag
     @PostMapping("/activitytag")
-    public JSONObject ControllerActivityTag(@RequestBody JSONObject jsonObject)
+    public JSONArray ControllerActivityTag(@RequestBody JSONObject jsonObject)
     {
         return browseActivity.GetTag(jsonObject.getInt("activityid"));
     }
 
     //返回活动的描述
     @PostMapping("/activitydescription")
-    public JSONObject ControllerActivityDescription(@RequestBody JSONObject jsonObject)
+    public JSONArray ControllerActivityDescription(@RequestBody JSONObject jsonObject)
     {
         return  browseActivity.GetDescription(jsonObject.getInt("activityid"));
     }
 
     //返回活动的评论
     @PostMapping("/activitycomment")
-    public JSONObject ControllerActivityComment(@RequestBody JSONObject jsonObject)
+    public JSONArray ControllerActivityComment(@RequestBody JSONObject jsonObject)
     {
         return browseActivity.GetComment(jsonObject.getInt("activityid"));
     }

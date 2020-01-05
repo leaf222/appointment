@@ -83,7 +83,7 @@ public class UserController
 
     //显示审核信息
     @PostMapping("/viewaccept")
-    public JSONObject ControllerViewAccept(@RequestBody JSONObject jsonObject)
+    public JSONArray ControllerViewAccept(@RequestBody JSONObject jsonObject)
     {
         return userService.GetParticipantInfo(jsonObject.getString("account"));
     }

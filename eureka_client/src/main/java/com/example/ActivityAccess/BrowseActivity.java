@@ -2,10 +2,13 @@ package com.example.ActivityAccess;
 
 import com.mysql.cj.protocol.Resultset;
 import net.sf.json.JSON;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import java.sql.*;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,7 +31,7 @@ public class BrowseActivity
     public static void main(String[] args)
     {
         BrowseActivity browseActivity = new BrowseActivity();
-        JSONObject result = browseActivity.GetComment(1);
+        JSONArray result = browseActivity.GetComment(1);
         System.out.println(result);
     }
 
@@ -46,9 +49,9 @@ public class BrowseActivity
     }
 
     //获取所有活动信息
-    public JSONObject GetAllInfo()
+    public JSONArray GetAllInfo()
     {
-        Map map = new HashMap();
+        List list = new LinkedList();
         try
         {
             String select = "SELECT * FROM `se`.`activity`;";
@@ -57,7 +60,6 @@ public class BrowseActivity
             int i = 0;
             while (resultset.next())
             {
-                i++;
                 Map amap = new HashMap();
                 int activityid = resultset.getInt("activityid");
                 int userid = resultset.getInt("userid");
@@ -73,16 +75,15 @@ public class BrowseActivity
                 amap.put("endtime",String.valueOf(endtime));
                 amap.put("address",address);
 
-                map.put("activity"+String.valueOf(i),amap);
+                list.add(amap);
             }
-            JSONObject jsonObject = JSONObject.fromObject(map);
-            return jsonObject;
+            JSONArray jsonArray = JSONArray.fromObject(list);
+            return jsonArray;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        map.put("??","???");
-        JSONObject jsonObject = JSONObject.fromObject(map);
-        return jsonObject;
+        JSONArray jsonArray = JSONArray.fromObject(list);
+        return jsonArray;
     }
 
     //通过活动id获取活动信息（此函数为tag查询功能实现）
@@ -223,18 +224,16 @@ public class BrowseActivity
     }
 
     //搜索活动
-    public JSONObject SearchActivity(String s)
+    public JSONArray SearchActivity(String s)
     {
-        Map map = new HashMap();
+        List list = new LinkedList();
         try
         {
             String select = "SELECT * FROM `se`.`activity` WHERE `activityname` LIKE '%" + s + "%';";
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(select);
-            int i = 0;
             while (resultSet.next())
             {
-                i++;
                 Map amap = new HashMap();
                 int activityid = resultSet.getInt("activityid");
                 int userid = resultSet.getInt("userid");
@@ -250,21 +249,21 @@ public class BrowseActivity
                 amap.put("endtime",String.valueOf(endtime));
                 amap.put("address",address);
 
-                map.put("activity"+String.valueOf(i),amap);
+                list.add(amap);
             }
-            JSONObject jsonObject = JSONObject.fromObject(map);
-            return jsonObject;
+            JSONArray jsonArray = JSONArray.fromObject(list);
+            return jsonArray;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        JSONObject jsonObject = JSONObject.fromObject(map);
-        return jsonObject;
+        JSONArray jsonArray = JSONArray.fromObject(list);
+        return jsonArray;
     }
 
     //返回活动对应的tag
-    public JSONObject GetTag(int activityid)
+    public JSONArray GetTag(int activityid)
     {
-        Map map = new HashMap();
+        List list = new LinkedList();
         try
         {
             String select = "SELECT * FROM `se`.`has_tag` WHERE `activityid` =" + activityid + ";";
@@ -280,23 +279,25 @@ public class BrowseActivity
                 ResultSet resultSet1 = statement1.executeQuery(select1);
                 while (resultSet1.next())
                 {
+                    Map map = new HashMap();
                     String tagname = resultSet1.getString("tagname");
-                    map.put("tag"+String.valueOf(i),tagname);
+                    map.put("tag",tagname);
+                    list.add(map);
                 }
             }
-            JSONObject jsonObject = JSONObject.fromObject(map);
-            return jsonObject;
+            JSONArray jsonArray = JSONArray.fromObject(list);
+            return jsonArray;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        JSONObject jsonObject = JSONObject.fromObject(map);
-        return  jsonObject;
+        JSONArray jsonArray = JSONArray.fromObject(list);
+        return jsonArray;
     }
 
     //返回活动对应的描述
-    public JSONObject GetDescription(int activityid)
+    public JSONArray GetDescription(int activityid)
     {
-        Map map = new HashMap();
+        List list = new LinkedList();
         try
         {
             String select = "SELECT * FROM `se`.`description` WHERE `activityid` =" + activityid + ";";
@@ -311,30 +312,28 @@ public class BrowseActivity
                 Timestamp time = resultSet.getTimestamp("time");
                 amap.put("d_content",d_content);
                 amap.put("time",String.valueOf(time));
-                map.put("description"+String.valueOf(i),amap);
+                list.add(amap);
             }
-            JSONObject jsonObject = JSONObject.fromObject(map);
-            return jsonObject;
+            JSONArray jsonArray = JSONArray.fromObject(list);
+            return jsonArray;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        JSONObject jsonObject = JSONObject.fromObject(map);
-        return jsonObject;
+        JSONArray jsonArray = JSONArray.fromObject(list);
+        return jsonArray;
     }
 
     //返回活动对应的评论
-    public JSONObject GetComment(int activityid)
+    public JSONArray GetComment(int activityid)
     {
-        Map map = new HashMap();
+        List list = new LinkedList();
         try
         {
             String select = "SELECT * FROM `se`.`comment` WHERE `activityid` = " + activityid + ";";
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(select);
-            int i = 0;
             while (resultSet.next())
             {
-                i++;
                 Map amap = new HashMap();
                 int userid = resultSet.getInt("userid");
                 String account = null;
@@ -353,14 +352,14 @@ public class BrowseActivity
                 amap.put("c_content",c_content);
                 amap.put("c_time",String.valueOf(c_time));
                 amap.put("score",String.valueOf(score));
-                map.put("comment"+String.valueOf(i),amap);
+                list.add(amap);
             }
-            JSONObject jsonObject = JSONObject.fromObject(map);
-            return jsonObject;
+            JSONArray jsonArray = JSONArray.fromObject(list);
+            return jsonArray;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        JSONObject jsonObject = JSONObject.fromObject(map);
-        return jsonObject;
+        JSONArray jsonArray = JSONArray.fromObject(list);
+        return jsonArray;
     }
 }
