@@ -3,6 +3,7 @@ package com.example.UserAccess;
 import net.sf.json.JSONObject;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,8 +25,14 @@ public class UserService
     private Connection connection = null;
 
     public static void main(String[] args) {
+
+        Timestamp c_time= new Timestamp(System.currentTimeMillis());//获取系统当前时间
+        SimpleDateFormat df = new SimpleDateFormat("2019-12-2 12:30:30");
+        String timeStr = df.format(c_time);
+        c_time = Timestamp.valueOf(timeStr);
+
         UserService userService = new UserService();
-        JSONObject result = userService.GetParticipantInfo("user2");
+        JSONObject result = userService.Comment("xxx",c_time,"user3",1, (float) 9.9);
         System.out.println(result);
     }
 
@@ -117,9 +124,58 @@ public class UserService
         return jsonObject;
     }
 
-    //审核结果
-    /*public JSONObject Accept(String account, int activityid, int accept)
+    //审核结果“审核结果”:“审核完成”“审核异常”
+    public JSONObject Accept(String account, int activityid, int accept)
     {
+        Map map = new HashMap();
+        try
+        {
+            ResultSet resultSet = GetInfo(account);
+            int usreid = 0;
+            while (resultSet.next())
+            {
+                usreid = resultSet.getInt("userid");
+            }
+            String update = "UPDATE `se`.`participant` "
+                    + "SET `accept` = " + accept
+                    + " WHERE `activityid` = " + activityid + " AND `userid` = " + usreid + ";";
+            Statement statement = connection.createStatement();
+            statement.executeUpdate(update);
+            map.put("审核结果","审核完成");
+            JSONObject jsonObject = JSONObject.fromObject(map);
+            return jsonObject;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        map.put("审核结果","审核异常");
+        JSONObject jsonObject = JSONObject.fromObject(map);
+        return jsonObject;
+    }
 
-    }*/
+    //评价活动“评价结果”:“评价成功”“已经评论过”
+    public JSONObject Comment(String c_content, Timestamp c_time, String account, int activityid, float score)
+    {
+        Map map = new HashMap();
+        try
+        {
+            ResultSet resultSet = GetInfo(account);
+            int userid = 0;
+            while (resultSet.next())
+            {
+                userid = resultSet.getInt("userid");
+            }
+            String insert = "INSERT INTO `se`.`comment`(`activityid`,`userid`,`c_content`,`c_time`,`score`) "
+                    + "VALUES(" + activityid + "," + userid + ",'" + c_content + "','" + c_time + "'," + score + ");";
+            Statement statement = connection.createStatement();
+            statement.executeUpdate(insert);
+            map.put("评价结果","评价成功");
+            JSONObject jsonObject = JSONObject.fromObject(map);
+            return jsonObject;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        map.put("评价结果","已经评论过");
+        JSONObject jsonObject = JSONObject.fromObject(map);
+        return jsonObject;
+    }
 }

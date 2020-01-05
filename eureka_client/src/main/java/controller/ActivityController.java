@@ -99,5 +99,17 @@ public class ActivityController
         return createActivity.DeleteActivity(jsonObject.getInt("activityid"));
     }
 
-    //显示申请
+    //修改活动信息
+    @PostMapping("/modifyactivity")
+    public JSONObject ControllerModifyActivity(@RequestBody JSONObject jsonObject)
+    {
+        Timestamp time= new Timestamp(System.currentTimeMillis());//获取系统当前时间
+        SimpleDateFormat df = new SimpleDateFormat(jsonObject.getString("time"));
+        String timeStr = df.format(time);
+        time = Timestamp.valueOf(timeStr);
+
+        return createActivity.ModifyActivity(jsonObject.getString("d_content")
+        ,time
+        ,jsonObject.getInt("activityid"));
+    }
 }

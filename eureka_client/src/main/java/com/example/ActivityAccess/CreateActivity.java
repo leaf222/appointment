@@ -37,7 +37,7 @@ public class CreateActivity
         timeStr = df.format(endtime);
         endtime = Timestamp.valueOf(timeStr);
 
-        JSONObject result = createActivity.AddToActivity("user2","好玩的",starttime,endtime,"我家","aaa","很好玩的哦");
+        JSONObject result = createActivity.ModifyActivity("快来玩呀",starttime,1);
         System.out.println(result);
     }
 
@@ -128,6 +128,27 @@ public class CreateActivity
             e.printStackTrace();
         }
         map.put("删除结果","删除失败");
+        JSONObject jsonObject = JSONObject.fromObject(map);
+        return jsonObject;
+    }
+
+    //修改活动信息（添加新的描述）“修改结果”：“修改成功”“修改失败”
+    public JSONObject ModifyActivity(String d_content, Timestamp time, int activityid)
+    {
+        Map map = new HashMap();
+        try
+        {
+            String insert = "INSERT INTO `se`.`description`(`activityid`,`d_content`,`time`) "
+                    + "VALUES(" + activityid + ",'" + d_content + "','" + time + "');";
+            Statement statement = connection.createStatement();
+            statement.executeUpdate(insert);
+            map.put("修改结果","修改成功");
+            JSONObject jsonObject = JSONObject.fromObject(map);
+            return jsonObject;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        map.put("修改结果","修改失败");
         JSONObject jsonObject = JSONObject.fromObject(map);
         return jsonObject;
     }
