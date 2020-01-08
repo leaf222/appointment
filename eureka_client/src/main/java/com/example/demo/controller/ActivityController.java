@@ -4,6 +4,7 @@ import com.example.ActivityAccess.BrowseActivity;
 import com.example.ActivityAccess.CreateActivity;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
@@ -16,6 +17,7 @@ import java.text.SimpleDateFormat;
  * @create: 2020/01/04
  **/
 @CrossOrigin
+@EnableEurekaClient
 @RestController
 @RequestMapping("/activity")
 public class ActivityController

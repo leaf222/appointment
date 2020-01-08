@@ -4,6 +4,7 @@ import com.example.UserAccess.UserService;
 import com.example.UserAccess.UserSign;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
@@ -17,6 +18,7 @@ import java.text.SimpleDateFormat;
  **/
 @CrossOrigin
 @RestController
+@EnableEurekaClient
 @RequestMapping("/user")
 public class UserController
 {
