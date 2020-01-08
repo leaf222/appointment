@@ -1,10 +1,13 @@
 package com.example.ActivityAccess;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,15 +32,16 @@ public class CreateActivity
         CreateActivity createActivity = new CreateActivity();
 
         Timestamp starttime= new Timestamp(System.currentTimeMillis());//获取系统当前时间
-        SimpleDateFormat df = new SimpleDateFormat("2019-12-1 12:30:30");
+        SimpleDateFormat df = new SimpleDateFormat("2020-03-04 12:30:30");
         String timeStr = df.format(starttime);
         starttime = Timestamp.valueOf(timeStr);
         Timestamp endtime= new Timestamp(System.currentTimeMillis());//获取系统当前时间
-        df = new SimpleDateFormat("2019-12-1 12:30:30");
+        df = new SimpleDateFormat("2020-02-04 11:44:55");
         timeStr = df.format(endtime);
         endtime = Timestamp.valueOf(timeStr);
 
-        JSONObject result = createActivity.ModifyActivity("快来玩呀",starttime,1);
+        JSONObject result = createActivity.AddToActivity("user1","新建活动",starttime,endtime,"一个地方",
+                "http111","这是描述");
         System.out.println(result);
     }
 
@@ -101,13 +105,13 @@ public class CreateActivity
             Statement statement2 =  connection.createStatement();
             statement2.executeUpdate(insert3);
 
-            map.put("创建结果","创建成功");
+            map.put("result","创建成功");
             JSONObject jsonObject = JSONObject.fromObject(map);
             return jsonObject;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        map.put("创建结果","创建失败");
+        map.put("result","创建失败");
         JSONObject jsonObject = JSONObject.fromObject(map);
         return jsonObject;
     }
@@ -121,13 +125,13 @@ public class CreateActivity
             String delete = "DELETE FROM `se`.`activity` WHERE `activityid` = " + activityid + ";";
             Statement statement = connection.createStatement();
             statement.executeUpdate(delete);
-            map.put("删除结果","删除成功");
+            map.put("result","删除成功");
             JSONObject jsonObject = JSONObject.fromObject(map);
             return jsonObject;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        map.put("删除结果","删除失败");
+        map.put("result","删除失败");
         JSONObject jsonObject = JSONObject.fromObject(map);
         return jsonObject;
     }
@@ -142,15 +146,65 @@ public class CreateActivity
                     + "VALUES(" + activityid + ",'" + d_content + "','" + time + "');";
             Statement statement = connection.createStatement();
             statement.executeUpdate(insert);
-            map.put("修改结果","修改成功");
+            map.put("result","修改成功");
             JSONObject jsonObject = JSONObject.fromObject(map);
             return jsonObject;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        map.put("修改结果","修改失败");
+        map.put("result","修改失败");
         JSONObject jsonObject = JSONObject.fromObject(map);
         return jsonObject;
     }
 
+    //为活动添加tag“添加结果”：“添加成功”“添加失败”
+    public JSONObject AddActivityTag(int activityid, String tagname)
+    {
+        Map map = new HashMap();
+        try
+        {
+            String select = "SELECT * FROM `se`.`tag` WHERE `tagname` = '" + tagname + "';";
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(select);
+            while(resultSet.next())
+            {
+                int tagid = resultSet.getInt("tagid");
+                String insert = "INSERT INTO `se`.`has_tag`(`tagid`,`activityid`) "
+                        + "VALUES(" + tagid + "," + activityid + ");";
+                Statement statement1 = connection.createStatement();
+                statement1.executeUpdate(insert);
+                map.put("result","添加成功");
+                JSONObject jsonObject = JSONObject.fromObject(map);
+                return jsonObject;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        map.put("result","添加失败");
+        JSONObject jsonObject = JSONObject.fromObject(map);
+        return jsonObject;
+    }
+
+    //展示所有tag
+    public JSONArray ShowAllTag()
+    {
+        List list = new LinkedList();
+        try
+        {
+            String select = "SELECT * FROM `se`.`tag`;";
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(select);
+            while(resultSet.next())
+            {
+                String tagname = resultSet.getString("tagname");
+                Map map = new HashMap();
+                map.put("tagname",tagname);
+                list.add(map);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        JSONArray jsonArray = JSONArray.fromObject(list);
+        return jsonArray;
+    }
 }

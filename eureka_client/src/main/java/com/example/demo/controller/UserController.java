@@ -1,16 +1,10 @@
-package controller;
+package com.example.demo.controller;
 
 import com.example.UserAccess.UserService;
 import com.example.UserAccess.UserSign;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.embedded.undertow.UndertowServletWebServer;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -21,14 +15,19 @@ import java.text.SimpleDateFormat;
  * @author: Yifan Ye
  * @create: 2020/01/04
  **/
-@Transactional
+@CrossOrigin
 @RestController
-@RequestMapping(value = "/user")
+@RequestMapping("/user")
 public class UserController
 {
-    @Autowired
-    UserSign userSign;
-    UserService userService;
+    private UserSign userSign;
+    private UserService userService;
+
+    public UserController()
+    {
+        userSign = new UserSign();
+        userService = new UserService();
+    }
 
     //用户登录
     @PostMapping("/signin")
@@ -192,5 +191,20 @@ public class UserController
     public JSONArray ControllerViewAllPermission(@RequestBody JSONObject jsonObject)
     {
         return userService.ViewAllPermission();
+    }
+
+    //展示所有通知
+    @PostMapping("/viewallinform")
+    public JSONArray ControllerViewAllInform(@RequestBody JSONObject jsonObject)
+    {
+        return userService.ViewAllInform(jsonObject.getString("account"));
+    }
+
+    //返回用户相对于活动的状态
+    @PostMapping("/getstatus")
+    public JSONObject ControllerGetStatus(@RequestBody JSONObject jsonObject)
+    {
+        return userSign.GetStatus(jsonObject.getInt("activityid")
+        ,jsonObject.getString("account"));
     }
 }

@@ -2,6 +2,7 @@ package com.example.UserAccess;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import sun.awt.image.ImageWatched;
 
 import java.sql.*;
 import java.text.SimpleDateFormat;
@@ -35,7 +36,7 @@ public class UserService
         c_time = Timestamp.valueOf(timeStr);
 
         UserService userService = new UserService();
-        JSONObject result = userService.LevelPermission("user2",2);
+        JSONArray result = userService.ViewAllInform("user2");
         System.out.println(result);
     }
 
@@ -142,13 +143,13 @@ public class UserService
                     + " WHERE `activityid` = " + activityid + " AND `userid` = " + usreid + ";";
             Statement statement = connection.createStatement();
             statement.executeUpdate(update);
-            map.put("审核结果","审核完成");
+            map.put("result","审核完成");
             JSONObject jsonObject = JSONObject.fromObject(map);
             return jsonObject;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        map.put("审核结果","审核异常");
+        map.put("result","审核异常");
         JSONObject jsonObject = JSONObject.fromObject(map);
         return jsonObject;
     }
@@ -169,13 +170,13 @@ public class UserService
                     + "VALUES(" + activityid + "," + userid + ",'" + c_content + "','" + c_time + "'," + score + ");";
             Statement statement = connection.createStatement();
             statement.executeUpdate(insert);
-            map.put("评价结果","评价成功");
+            map.put("result","评价成功");
             JSONObject jsonObject = JSONObject.fromObject(map);
             return jsonObject;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        map.put("评价结果","已经评论过");
+        map.put("result","已经评论过");
         JSONObject jsonObject = JSONObject.fromObject(map);
         return jsonObject;
     }
@@ -196,13 +197,13 @@ public class UserService
                     + "VALUES(" + activityid+"," + userid + ",0);";
             Statement statement = connection.createStatement();
             statement.executeUpdate(insert);
-            map.put("申请结果","申请成功，等待审核");
+            map.put("result","申请成功，等待审核");
             JSONObject jsonObject = JSONObject.fromObject(map);
             return jsonObject;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        map.put("申请结果","已经申请过了");
+        map.put("result","已经申请过了");
         JSONObject jsonObject = JSONObject.fromObject(map);
         return jsonObject;
     }
@@ -223,13 +224,13 @@ public class UserService
                     + activityid + " AND `userid` = " + userid + ";";
             Statement statement = connection.createStatement();
             statement.executeUpdate(delete);
-            map.put("退出结果","成功退出");
+            map.put("result","成功退出");
             JSONObject jsonObject = JSONObject.fromObject(map);
             return jsonObject;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        map.put("退出结果","不在活动中");
+        map.put("result","不在活动中");
         JSONObject jsonObject = JSONObject.fromObject(map);
         return jsonObject;
     }
@@ -250,13 +251,13 @@ public class UserService
                     + "VALUES(" + activityid + "," + userid + ");";
             Statement statement = connection.createStatement();
             statement.executeUpdate(insert);
-            map.put("收藏结果","收藏成功");
+            map.put("result","收藏成功");
             JSONObject jsonObject = JSONObject.fromObject(map);
             return jsonObject;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        map.put("收藏结果","已经收藏");
+        map.put("result","已经收藏");
         JSONObject jsonObject = JSONObject.fromObject(map);
         return jsonObject;
     }
@@ -276,13 +277,13 @@ public class UserService
             String delete = "DELETE FROM `se`.`favorite` WHERE `userid` = " + userid + " AND `activityid` = " + activityid + ";";
             Statement statement = connection.createStatement();
             statement.executeUpdate(delete);
-            map.put("取消收藏结果","成功取消收藏");
+            map.put("result","成功取消收藏");
             JSONObject jsonObject = JSONObject.fromObject(map);
             return jsonObject;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        map.put("取消收藏结果","未收藏");
+        map.put("result","未收藏");
         JSONObject jsonObject = JSONObject.fromObject(map);
         return jsonObject;
     }
@@ -317,6 +318,7 @@ public class UserService
                     Timestamp starttime = resultSet2.getTimestamp("starttime");
                     Timestamp endtime = resultSet2.getTimestamp("endtime");
                     String address = resultSet2.getString("address");
+                    String imgurl = resultSet2.getString("imgurl");
 
                     map.put("userid",String.valueOf(userid1));
                     map.put("account",account1);
@@ -325,6 +327,7 @@ public class UserService
                     map.put("starttime",String.valueOf(starttime));
                     map.put("endtime",String.valueOf(endtime));
                     map.put("address",address);
+                    map.put("imgurl",imgurl);
                 }
                 list.add(map);
             }
@@ -363,6 +366,7 @@ public class UserService
                 Timestamp starttime = resultSet1.getTimestamp("starttime");
                 Timestamp endtime = resultSet1.getTimestamp("endtime");
                 String address = resultSet1.getString("address");
+                String imgurl = resultSet1.getString("imgurl");
 
                 map.put("userid",String.valueOf(userid1));
                 map.put("account",account1);
@@ -371,6 +375,7 @@ public class UserService
                 map.put("starttime",String.valueOf(starttime));
                 map.put("endtime",String.valueOf(endtime));
                 map.put("address",address);
+                map.put("imgurl",imgurl);
 
                 list.add(map);
             }
@@ -413,6 +418,7 @@ public class UserService
                     Timestamp starttime = resultSet2.getTimestamp("starttime");
                     Timestamp endtime = resultSet2.getTimestamp("endtime");
                     String address = resultSet2.getString("address");
+                    String imgurl = resultSet2.getString("imgurl");
 
                     map.put("userid",String.valueOf(userid1));
                     map.put("account",account1);
@@ -421,6 +427,7 @@ public class UserService
                     map.put("starttime",String.valueOf(starttime));
                     map.put("endtime",String.valueOf(endtime));
                     map.put("address",address);
+                    map.put("imgurl",imgurl);
                 }
                 list.add(map);
             }
@@ -463,6 +470,7 @@ public class UserService
                     Timestamp starttime = resultSet2.getTimestamp("starttime");
                     Timestamp endtime = resultSet2.getTimestamp("endtime");
                     String address = resultSet2.getString("address");
+                    String imgurl = resultSet2.getString("imgurl");
 
                     map.put("userid",String.valueOf(userid1));
                     map.put("account",account1);
@@ -471,6 +479,7 @@ public class UserService
                     map.put("starttime",String.valueOf(starttime));
                     map.put("endtime",String.valueOf(endtime));
                     map.put("address",address);
+                    map.put("imgurl",imgurl);
                 }
                 list.add(map);
             }
@@ -499,13 +508,13 @@ public class UserService
                     + "VALUES("+userid+","+level+");";
             Statement statement = connection.createStatement();
             statement.executeUpdate(insert);
-            map.put("申请结果","等待审核");
+            map.put("result","等待审核");
             JSONObject jsonObject = JSONObject.fromObject(map);
             return jsonObject;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        map.put("申请结果","已经申请");
+        map.put("result","已经申请");
         JSONObject jsonObject = JSONObject.fromObject(map);
         return jsonObject;
     }
@@ -528,13 +537,13 @@ public class UserService
             String update = "UPDATE `se`.`user` SET `identity` = " + level + " WHERE `userid` = " + userid + ";";
             Statement statement1 = connection.createStatement();
             statement.executeUpdate(update);
-            map.put("审核结果","审核完成");
+            map.put("result","审核完成");
             JSONObject jsonObject = JSONObject.fromObject(map);
             return jsonObject;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        map.put("审核结果","审核出现意外错误");
+        map.put("result","审核出现意外错误");
         JSONObject jsonObject = JSONObject.fromObject(map);
         return jsonObject;
     }
@@ -554,13 +563,13 @@ public class UserService
             String delete = "DELETE FROM `se`.`permission` WHERE `userid` = " + userid + ";";
             Statement statement = connection.createStatement();
             statement.executeUpdate(delete);
-            map.put("审核结果","审核完成");
+            map.put("result","审核完成");
             JSONObject jsonObject = JSONObject.fromObject(map);
             return jsonObject;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        map.put("审核结果","审核出现意外错误");
+        map.put("result","审核出现意外错误");
         JSONObject jsonObject = JSONObject.fromObject(map);
         return jsonObject;
     }
@@ -583,6 +592,46 @@ public class UserService
                 map.put("account",account);
                 map.put("level",String.valueOf(level));
                 list.add(map);
+            }
+            JSONArray jsonArray = JSONArray.fromObject(list);
+            return jsonArray;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        JSONArray jsonArray = JSONArray.fromObject(list);
+        return jsonArray;
+    }
+
+    //展示所有通知
+    public JSONArray ViewAllInform(String account)
+    {
+        List list = new LinkedList();
+        try
+        {
+            ResultSet resultSet = GetInfo(account);
+            int userid = 0;
+            while(resultSet.next())
+            {
+                userid = resultSet.getInt("userid");
+            }
+            String select = "SELECT * FROM `se`.`participant` WHERE `userid` = " + userid + " AND `accept` = 2;";
+            Statement statement = connection.createStatement();
+            ResultSet resultSet1 = statement.executeQuery(select);
+            while(resultSet1.next())
+            {
+                int activityid = resultSet1.getInt("activityid");
+                String select1 = "SELECT * FROM `se`.`description` WHERE `activityid` =" + activityid + ";";
+                Statement statement1 = connection.createStatement();
+                ResultSet resultSet2 = statement1.executeQuery(select1);
+                while (resultSet2.next())
+                {
+                    Map amap = new HashMap();
+                    String d_content = resultSet2.getString("d_content");
+                    Timestamp time = resultSet2.getTimestamp("time");
+                    amap.put("d_content",d_content);
+                    amap.put("time",String.valueOf(time));
+                    list.add(amap);
+                }
             }
             JSONArray jsonArray = JSONArray.fromObject(list);
             return jsonArray;

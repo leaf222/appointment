@@ -1,15 +1,10 @@
-package controller;
+package com.example.demo.controller;
 
 import com.example.ActivityAccess.BrowseActivity;
 import com.example.ActivityAccess.CreateActivity;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -20,14 +15,20 @@ import java.text.SimpleDateFormat;
  * @author: Yifan Ye
  * @create: 2020/01/04
  **/
-@Transactional
+@CrossOrigin
 @RestController
-@RequestMapping(value = "/activity")
+@RequestMapping("/activity")
 public class ActivityController
 {
-    @Autowired
-    BrowseActivity browseActivity;
-    CreateActivity createActivity;
+    private BrowseActivity browseActivity;
+    private CreateActivity createActivity;
+
+    public ActivityController()
+    {
+        browseActivity = new BrowseActivity();
+        createActivity = new CreateActivity();
+    }
+
 
     //查看所有活动
     @PostMapping("/allactivity")
@@ -71,6 +72,13 @@ public class ActivityController
         return browseActivity.GetComment(jsonObject.getInt("activityid"));
     }
 
+    //返回活动的收藏数，参加数
+    @PostMapping("/getotherinfo")
+    public JSONObject ControllerGetOtherInfo(@RequestBody JSONObject jsonObject)
+    {
+        return browseActivity.GetOtherInfo(jsonObject.getInt("activityid"));
+    }
+
     //创建活动
     @PostMapping("/createactivity")
     public JSONObject ControllerCreateActivity(@RequestBody JSONObject jsonObject)
@@ -112,5 +120,48 @@ public class ActivityController
         return createActivity.ModifyActivity(jsonObject.getString("d_content")
         ,time
         ,jsonObject.getInt("activityid"));
+    }
+
+    //根据tag获取有此tag的活动信息
+    @PostMapping("/getactivitybytag")
+    public JSONArray ControllerGetActivityByTag(@RequestBody JSONObject jsonObject)
+    {
+        return browseActivity.GetInfoByTag(jsonObject.getString("tagname"));
+    }
+
+    //为活动添加tag
+    @PostMapping("/addtagtoactivity")
+    public JSONObject ControllerAddTagToActivity(@RequestBody JSONObject jsonObject)
+    {
+        return createActivity.AddActivityTag(jsonObject.getInt("activityid")
+        ,jsonObject.getString("tagname"));
+    }
+
+    //返回所有tag
+    @PostMapping("/showalltag")
+    public JSONArray ControllerShowAllTag(@RequestBody JSONObject jsonObject)
+    {
+        return createActivity.ShowAllTag();
+    }
+
+    //按参与人数排名返回
+    @PostMapping("/rankbyparticipant")
+    public JSONArray ControllerRankByParticipant(@RequestBody JSONObject jsonObject)
+    {
+        return browseActivity.RankByParticipant();
+    }
+
+    //按评分排名返回
+    @PostMapping("/rankbyscore")
+    public JSONArray ControllerRankByScore(@RequestBody JSONObject jsonObject)
+    {
+        return browseActivity.RankByScore();
+    }
+
+    //按收藏数排名返回
+    @PostMapping("/rankbyfavorite")
+    public JSONArray ControllerRankByFavorite(@RequestBody JSONObject jsonObject)
+    {
+        return browseActivity.RankByFavorite();
     }
 }

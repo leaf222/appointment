@@ -15,7 +15,6 @@ import java.sql.*;
 
 
 @EnableTransactionManagement
-@EnableEurekaClient
 @SpringBootApplication
 @RestController
 public class DemoApplication {

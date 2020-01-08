@@ -31,7 +31,7 @@ public class BrowseActivity
     public static void main(String[] args)
     {
         BrowseActivity browseActivity = new BrowseActivity();
-        JSONArray result = browseActivity.GetComment(1);
+        JSONArray result = browseActivity.GetAllInfo();
         System.out.println(result);
     }
 
@@ -67,6 +67,7 @@ public class BrowseActivity
                 Timestamp starttime = resultset.getTimestamp("starttime");
                 Timestamp endtime = resultset.getTimestamp("endtime");
                 String address = resultset.getString("address");
+                String imgurl = resultset.getString("imgurl");
 
                 amap.put("activityid",String.valueOf(activityid));
                 amap.put("userid",String.valueOf(userid));
@@ -74,6 +75,7 @@ public class BrowseActivity
                 amap.put("starttime",String.valueOf(starttime));
                 amap.put("endtime",String.valueOf(endtime));
                 amap.put("address",address);
+                amap.put("imgurl",imgurl);
 
                 list.add(amap);
             }
@@ -102,6 +104,7 @@ public class BrowseActivity
                 Timestamp starttime = resultSet.getTimestamp("starttime");
                 Timestamp endtime = resultSet.getTimestamp("endtime");
                 String address = resultSet.getString("address");
+                String imgurl = resultSet.getString("imgurl");
 
                 map.put("userid",String.valueOf(userid));
                 map.put("activityid",String.valueOf(activityid));
@@ -109,6 +112,7 @@ public class BrowseActivity
                 map.put("starttime",String.valueOf(starttime));
                 map.put("endtime",String.valueOf(endtime));
                 map.put("address",address);
+                map.put("imgurl",imgurl);
             }
             return  map;
         } catch (SQLException e) {
@@ -133,6 +137,7 @@ public class BrowseActivity
                 Timestamp starttime = resultSet.getTimestamp("starttime");
                 Timestamp endtime = resultSet.getTimestamp("endtime");
                 String address = resultSet.getString("address");
+                String imgurl = resultSet.getString("imgurl");
 
                 map.put("userid",String.valueOf(userid));
                 map.put("activityid",String.valueOf(activityid));
@@ -140,6 +145,7 @@ public class BrowseActivity
                 map.put("starttime",String.valueOf(starttime));
                 map.put("endtime",String.valueOf(endtime));
                 map.put("address",address);
+                map.put("imgurl",imgurl);
             }
             JSONObject jsonObject = JSONObject.fromObject(map);
             return  jsonObject;
@@ -151,9 +157,9 @@ public class BrowseActivity
     }
 
     //通过tag名称获取所有拥有此tag的活动信息
-    public JSONObject GetInfoByTag(String tagname)
+    public JSONArray GetInfoByTag(String tagname)
     {
-        Map map = new HashMap();
+        List list = new LinkedList();
         try
         {
             int tagid = 0;
@@ -167,22 +173,20 @@ public class BrowseActivity
             String select2 = "SELECT * FROM `se`.`has_tag` WHERE `tagid` =" + tagid + ";";
             Statement statement2 = connection.createStatement();
             ResultSet resultSet2 = statement2.executeQuery(select2);
-            int i = 0;
             while (resultSet2.next())
             {
-                i++;
                 int activityid = resultSet2.getInt("activityid");
                 Map amap = GetInfoById(activityid);
 
-                map.put("activity"+String.valueOf(i),amap);
+                list.add(amap);
             }
-            JSONObject jsonObject = JSONObject.fromObject(map);
-            return jsonObject;
+            JSONArray jsonArray = JSONArray.fromObject(list);
+            return jsonArray;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        JSONObject jsonObject = JSONObject.fromObject(map);
-        return jsonObject;
+        JSONArray jsonArray = JSONArray.fromObject(list);
+        return jsonArray;
     }
 
     //通过用户id返回发布的所有活动
@@ -204,6 +208,7 @@ public class BrowseActivity
                 Timestamp starttime = resultSet.getTimestamp("starttime");
                 Timestamp endtime = resultSet.getTimestamp("endtime");
                 String address = resultSet.getString("address");
+                String imgurl = resultSet.getString("imgurl");
 
                 amap.put("activityid",String.valueOf(activityid));
                 amap.put("userid",String.valueOf(userid));
@@ -211,6 +216,7 @@ public class BrowseActivity
                 amap.put("starttime",String.valueOf(starttime));
                 amap.put("endtime",String.valueOf(endtime));
                 amap.put("address",address);
+                amap.put("imgurl",imgurl);
 
                 map.put("activity"+String.valueOf(i),amap);
             }
@@ -241,6 +247,7 @@ public class BrowseActivity
                 Timestamp starttime = resultSet.getTimestamp("starttime");
                 Timestamp endtime = resultSet.getTimestamp("endtime");
                 String address = resultSet.getString("address");
+                String imgurl = resultSet.getString("imgurl");
 
                 amap.put("activityid",String.valueOf(activityid));
                 amap.put("userid",String.valueOf(userid));
@@ -248,6 +255,7 @@ public class BrowseActivity
                 amap.put("starttime",String.valueOf(starttime));
                 amap.put("endtime",String.valueOf(endtime));
                 amap.put("address",address);
+                amap.put("imgurl",imgurl);
 
                 list.add(amap);
             }
@@ -361,5 +369,143 @@ public class BrowseActivity
         }
         JSONArray jsonArray = JSONArray.fromObject(list);
         return jsonArray;
+    }
+
+    //返回活动对应的收藏数，参加人数
+    public JSONObject GetOtherInfo(int activityid)
+    {
+        Map map = new HashMap();
+        try
+        {
+            int participantNumber = 0;
+            int favoriteNumber = 0;
+            String getFavorite = "SELECT * FROM\n" +
+                    "(SELECT `activityid`,`count_userid` FROM\n" +
+                    "(SELECT `activityid`,count(`userid`) as `count_userid`\n" +
+                    "FROM `se`.`favorite`\n" +
+                    "GROUP BY `activityid`) as `q`\n" +
+                    "ORDER BY `count_userid` DESC) as `p`\n" +
+                    "WHERE `activityid` = " + activityid + ";";
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(getFavorite);
+            while(resultSet.next())
+            {
+                favoriteNumber = resultSet.getInt("count_userid");
+                map.put("favoritenumber",String.valueOf(favoriteNumber));
+            }
+            String getParticipant = "SELECT * FROM " +
+                    "(SELECT `activityid`,`count_userid` FROM " +
+                    "(SELECT `activityid`,count(`userid`) as `count_userid` " +
+                    "FROM `se`.`participant` " +
+                    "GROUP BY `activityid`) as `q` " +
+                    "ORDER BY `count_userid` DESC) as `p` " +
+                    "WHERE `activityid` = 1;";
+            Statement statement1 = connection.createStatement();
+            ResultSet resultSet1 = statement1.executeQuery(getParticipant);
+            while (resultSet1.next())
+            {
+                participantNumber = resultSet1.getInt("count_userid");
+                map.put("participantnumber",String.valueOf(participantNumber));
+            }
+            JSONObject jsonObject = JSONObject.fromObject(map);
+            return jsonObject;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        JSONObject jsonObject = JSONObject.fromObject(map);
+        return jsonObject;
+    }
+
+    //按评分返回活动
+    public JSONArray RankByScore()
+    {
+        List list = new LinkedList();
+        try
+        {
+            String select = "SELECT `activityid`,`avg_score` FROM " +
+                    "(SELECT `activityid`,avg(`score`) as `avg_score` " +
+                    "FROM `se`.`comment` " +
+                    "GROUP BY `activityid`) as `q` " +
+                    "ORDER BY `avg_score` DESC;";
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(select);
+            int i = 0;
+            while (resultSet.next())
+            {
+                i++;
+                int activityid = resultSet.getInt("activityid");
+                Map amap = GetInfoById(activityid);
+                amap.put("rank",String.valueOf(i));
+                list.add(amap);
+            }
+            JSONArray jsonArray = JSONArray.fromObject(list);
+            return  jsonArray;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        JSONArray jsonArray = JSONArray.fromObject(list);
+        return  jsonArray;
+    }
+
+    //按参与人数返回
+    public JSONArray RankByParticipant()
+    {
+        List list = new LinkedList();
+        try
+        {
+            String select = "SELECT `activityid`,`count_userid` FROM " +
+                    "(SELECT `activityid`,count(`userid`) as `count_userid` " +
+                    "FROM `se`.`comment` " +
+                    "GROUP BY `activityid`) as `q` " +
+                    "ORDER BY `count_userid` DESC;";
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(select);
+            int i = 0;
+            while (resultSet.next())
+            {
+                i++;
+                int activityid = resultSet.getInt("activityid");
+                Map amap = GetInfoById(activityid);
+                amap.put("rank",String.valueOf(i));
+                list.add(amap);
+            }
+            JSONArray jsonArray = JSONArray.fromObject(list);
+            return  jsonArray;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        JSONArray jsonArray = JSONArray.fromObject(list);
+        return  jsonArray;
+    }
+
+    //按收藏数返回
+    public JSONArray RankByFavorite()
+    {
+        List list = new LinkedList();
+        try
+        {
+            String select = "SELECT `activityid`,`count_userid` FROM " +
+                    "(SELECT `activityid`,count(`userid`) as `count_userid` " +
+                    "FROM `se`.`favorite` " +
+                    "GROUP BY `activityid`) as `q` " +
+                    "ORDER BY `count_userid` DESC;";
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(select);
+            int i = 0;
+            while (resultSet.next())
+            {
+                i++;
+                int activityid = resultSet.getInt("activityid");
+                Map amap = GetInfoById(activityid);
+                amap.put("rank",String.valueOf(i));
+                list.add(amap);
+            }
+            JSONArray jsonArray = JSONArray.fromObject(list);
+            return  jsonArray;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        JSONArray jsonArray = JSONArray.fromObject(list);
+        return  jsonArray;
     }
 }
